@@ -73,17 +73,13 @@ Nothing to be done.
 >
 
 
-
 ## Input functions in Snakemake
 
-Snakemake's normal way of calculating the inputs to a rule involves plugging wildcards into fixed templates. In most
-cases, you can (and should) use carefully chosen file naming to make this work, but in some cases there is no way
-to do it while keeping the rule generic.
+Snakemake's normal way of calculating the inputs to a rule involves plugging wildcards into fixed templates. In most cases, you can (and should) use carefully chosen file naming to make this work, but in some cases there is no way to do it while keeping the rule generic.
 
-A typical example would be a combining rule where the number of things to combine is not fixed. Imagine we had these
-input files.
+A typical example would be a combining rule where the number of things to combine is not fixed. Imagine we had these input files.
 
-~~~
+```
 $ tree reads/
 reads/
 ├── control_A
@@ -102,25 +98,22 @@ reads/
     ├── r1.fasta
     ├── r2.fasta
     └── r3.fasta
-~~~
-{: .language-bash}
+```
+
 
 And we want to merge them by sample.
 
-~~~
+```
 rule merge_reads_for_sample:
     output: "merged_{sample}.fasta"
     input:  expand("reads/{{sample}}/r{n}.fasta", n=[0,1,2,3])
     shell:
         cat {input} > {output}
-~~~
-{: .language-python}
+```
 
-This rule will work for the `high_conc` and `low_conc` samples but for the `control` samples Snakemake
-will complain about missing input files. We need a different expansion depending on the value of `{sample}`,
-and this is what an input function can do for us.
+This rule will work for the `high_conc` and `low_conc` samples but for the `control` samples Snakemake will complain about missing input files. We need a different expansion depending on the value of `{sample}`, and this is what an input function can do for us.
 
-~~~
+```
 def i_reads_for_sample(wildcards):
     """Input function for merge_reads_for_sample rule. Our control libraries
        have 2 reads and the others all have 4.
@@ -140,22 +133,19 @@ rule merge_reads_for_sample:
     input:  i_reads_for_sample
     shell:
         cat {input} > {output}
-~~~
-{: .language-python}
+```
 
 Looking at this line by line:
 
-* The function is named `i_reads_for_sample`.
+- The function is named `i_reads_for_sample`.
   * I prefer to prefix my input functions with `i_` but this is not a widespread Snakemake convention
   * The function has to be defined before the rule
   * All input functions take a single argument which is conventionally named `wildcards` or `wc`
-* The value from `wildcards.sample` is copied to a local variable `sample_name`
-* An `if`/`else` statement is used to work out the correct number of reads for this particular sample
-* Finally, the `expand()` function gives the full list of input files needed for this sample
-  * Note that I have had to explicitly add `sample = sample_name` here in the expansion as Snakemake
-    will no longer fill this in for me.
-* The rule now has the line `input:  i_reads_for_sample`. Note there are no paretheses or quotes but
-  just the bare function name.
+- The value from `wildcards.sample` is copied to a local variable `sample_name`
+  * An `if`/`else` statement is used to work out the correct number of reads for this particular sample
+- Finally, the `expand()` function gives the full list of input files needed for this sample
+  * Note that I have had to explicitly add `sample = sample_name` here in the expansion as Snakemake will no longer fill this in for me.
+- The rule now has the line `input:  i_reads_for_sample`. Note there are no paretheses or quotes but just the bare function name.
 
 The example is a little contrived, but illustrates all the key points. When Snakemake reads the rule
 definition it saves a reference to the function but does not call it yet. Only once it goes to make the
