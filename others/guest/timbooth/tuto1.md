@@ -1,4 +1,4 @@
-# Guest post: Snakemake Input Functions
+# Guest post: Snakemake Input Functions by Tim Booth
 
 ## Workflows can get really complex
 
@@ -162,7 +162,7 @@ It turns out this logic is analagous to running a tournament bracket, where rath
 
 First, generate our "top trumps" player cards.
 
-~~~
+```
 $ ./generate_cards.py 8
 Generating 8 cards in ./all_cards/
 DONE
@@ -177,12 +177,11 @@ $ cat all_cards/card1.json
   "Power": 93,
   "Skill": 31
 }
-~~~
+```
 
-You'll see a different name and stats as the generator is randomised.
-Now we can match any two of these players to see who wins.
+You'll see a different name and stats as the generator is randomised. Now we can match any two of these players to see who wins.
 
-~~~
+```
 ./play_a_match.py all_cards/card_1.json  all_cards/card_2.json
 Matching Gil Annor vs Kennel Timwick.
 The criterion is: Highest Skill.
@@ -194,16 +193,11 @@ Winner is Kennel Timwick with 79 vs 31.
   "Power": 60,
   "Skill": 79
 }
-~~~
+```
 
-The match-up script simply picks a random category, compares the corresponding values and prints out
-the winning card, so how do we get Snakemake to orchestrate a tournament of multiple matches
-for us? The idea is to use a recursive algorithm where the tournament of 8 is split into two
-sub-tournaments of 4, and each of these in turn is two sub-sub-tournaments of 2.
-Of course, a tournament of 2 is simply a single match, so this is the base case. If we have
-all the players in a list, it looks like this, because Python lists count from 0:
+The match-up script simply picks a random category, compares the corresponding values and prints out the winning card, so how do we get Snakemake to orchestrate a tournament of multiple matches for us? The idea is to use a recursive algorithm where the tournament of 8 is split into two sub-tournaments of 4, and each of these in turn is two sub-sub-tournaments of 2. Of course, a tournament of 2 is simply a single match, so this is the base case. If we have all the players in a list, it looks like this, because Python lists count from 0:
 
-~~~
+```
 players = [ "card_1",  # index 0
             "card_2",  # index 1
             "card_3",  # index 2
@@ -212,17 +206,11 @@ players = [ "card_1",  # index 0
             "card_6",  # index 5
             "card_7",  # index 6
             "card_8" ] # index 7
-~~~
-{: .language-python}
+```
 
-The players could be listed in any order, and the order of the list determines how the player
-cards are paired up in the tournament.
-By the Python convention of sub-list indexing we'll call the match between card_1 and card_2 `[0:2]`,
-the match between card_3 and card_4 `[2:4]`, and the match between the winner of those is `[0:4]`. Then
-the other semi-final is `[4:8]` and the very final match is `[0:8]`. This scheme works for any number of
-starting cards. The logic this leads us to is:
+The players could be listed in any order, and the order of the list determines how the player cards are paired up in the tournament. By the Python convention of sub-list indexing we'll call the match between card_1 and card_2 `[0:2]`, the match between card_3 and card_4 `[2:4]`, and the match between the winner of those is `[0:4]`. Then the other semi-final is `[4:8]` and the very final match is `[0:8]`. This scheme works for any number of starting cards. The logic this leads us to is:
 
-~~~
+```
 # Pseudo-code for building the tournament plan.
 # Starting with the final, range=[0:8], recurse back until we hit first round matches
 
@@ -238,33 +226,25 @@ else:
     # This is first-round match between two players
     match players[range_start] vs.
           players[range_start+1]
-~~~
+```
 
-This idea will work for 8, 16, 32, players etc. We can handle all the cases where the number is not a power of 2
-by adding a third condition.
+This idea will work for 8, 16, 32, players etc. We can handle all the cases where the number is not a power of 2 by adding a third condition.
 
-~~~
+```
 # More pseudo-code
 
 if player_count == 3:
     match winner of match [{range_start+1}:{range_end}] vs.
           players[range_start]
-~~~
+```
 
-This resolves a range like `[0:3]` by playing two of the players against each other and then matching the
-third one against the winner. The effect is that some of the players will get a bye in the first round of the
-tournament if there are not 2<sup>n</sup> players. The total number of matches in the tournament will in all cases be one
-fewer then the total number of players.
+This resolves a range like `[0:3]` by playing two of the players against each other and then matching the third one against the winner. The effect is that some of the players will get a bye in the first round of the tournament if there are not 2<sup>n</sup> players. The total number of matches in the tournament will in all cases be one fewer then the total number of players.
 
-Because every tournament match is now uniquely identified by two numbers, we can save the results of
-every match into a file named `matches/{start}-{end}.json`. The champion will be saved to
-`matches/0-8.json`, or whatever number corresponds to the length of the list of players.
+Because every tournament match is now uniquely identified by two numbers, we can save the results of every match into a file named `matches/{start}-{end}.json`. The champion will be saved to `matches/0-8.json`, or whatever number corresponds to the length of the list of players.
 
-And so here is the final Snakefile implementing these ideas. I've added a `glob()` expression to scan
-for the input files, a driver rule to show the winner, and a rule to play individual matches. I've
-translated the pseudo-code above into working Python and put it into an input function.
+And so here is the final Snakefile implementing these ideas. I've added a `glob()` expression to scan for the input files, a driver rule to show the winner, and a rule to play individual matches. I've translated the pseudo-code above into working Python and put it into an input function.
 
-~~~
+```
 from glob import glob
 
 # Each "player" is one top trumps card, represented as a JSON file.
@@ -309,22 +289,15 @@ rule play_match:
     input:  i_play_match
     shell:
         "python3 play_a_match.py {input[0]} {input[1]} > {output}"
-~~~
-{: .language-python}
+```
 
-
-<figure>
-  <img
-  src="/assets/fig/dag8.svg"
-  alt="DAG for 8 player tournament bracket">
-  <figcaption><em>
-    DAG generated by the final Snakefile for an 8-player tournament.
-  </em></figcaption>
-</figure>
+| ![DAG for 8 player tournament bracket](dag8.svg) | 
+|:--:| 
+| DAG generated by the final Snakefile for an 8-player tournament. |
 
 And we run it:
 
-~~~
+```
 $ snakemake -F -j1
 ...
 Job counts:
@@ -341,19 +314,7 @@ And the winner is...
   "Skill": 96
 }
 ...
-~~~
+```
 
-Well done, Congal Anndelwick! Having played a tournament of 8 players, we can generate a bunch more cards to put the workflow
-though its paces, and we can try using the `-j` flag to run early rounds in parallel. On my laptop, a
-tournament of 250 takes around 15 seconds, but this drops to 5 seconds by using `-j 8`. Of course most of the
-time here is spent starting and stopping the Python interpreter. If the matches were
-actually taking real time to process, for example by simulating a game between the players rather than just
-comparing numbers, the advantage of running in parallel could be very significant.
+Well done, Congal Anndelwick! Having played a tournament of 8 players, we can generate a bunch more cards to put the workflow though its paces, and we can try using the `-j` flag to run early rounds in parallel. On my laptop, a tournament of 250 takes around 15 seconds, but this drops to 5 seconds by using `-j 8`. Of course most of the time here is spent starting and stopping the Python interpreter. If the matches were actually taking real time to process, for example by simulating a game between the players rather than just comparing numbers, the advantage of running in parallel could be very significant.
 
-
-[fig-spaghetti]: /assets/fig/rulegraph_complex.svg
-{% comment %}
-Leif Wigge, Rasmus Ågren and John Sundh SciLifeLab, National Bioinformatics Infrastructure Sweden (NBIS), Bioinformatics Long-term Support
-https://nbis-reproducible-research.readthedocs.io/en/course_1911/snakemake/
-MIT License
-{% endcomment %}
