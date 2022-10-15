@@ -1,5 +1,7 @@
 # Guest post: Snakemake Input Functions by Tim Booth
 
+![Timothy Booth - Edinburgh Genomics](TimBooth.jpg)
+
 ## Workflows can get really complex
 
 If you turn your entire analysis project into a Snakemake workflow, you may end up with something like this.
