@@ -4,22 +4,9 @@
 
 If you turn your entire analysis project into a Snakemake workflow, you may end up with something like this.
 
-
-{% comment %}
-![A flying Snakemake spaghetti monster][fig-spaghetti]
-{% endcomment %}
-<figure>
-  <img
-  src="/assets/fig/rulegraph_complex.svg"
-  alt="A flying Snakemake spaghetti monster">
-  <figcaption><em>
-  <a href="https://nbis-reproducible-research.readthedocs.io/en/course_1911/snakemake/">
-  Leif Wigge, Rasmus Ågren and John Sundh SciLifeLab,
-  National Bioinformatics Infrastructure Sweden (NBIS),
-  Bioinformatics Long-term Support</a>
-  MIT License
-  </em></figcaption>
-</figure>
+| ![A flying Snakemake spaghetti monster](rulegraph_complex.svg) | 
+|:--:| 
+| [Leif Wigge, Rasmus Ågren and John Sundh SciLifeLab, National Bioinformatics Infrastructure Sweden (NBIS), Bioinformatics Long-term Support, MIT License](https://nbis-reproducible-research.readthedocs.io/en/course_1911/snakemake/) |
 
 
 Sometimes, the standard Snakemake wildcard matching logic is not enough to express the connections you need
