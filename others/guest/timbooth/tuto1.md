@@ -318,3 +318,8 @@ And the winner is...
 
 Well done, Congal Anndelwick! Having played a tournament of 8 players, we can generate a bunch more cards to put the workflow though its paces, and we can try using the `-j` flag to run early rounds in parallel. On my laptop, a tournament of 250 takes around 15 seconds, but this drops to 5 seconds by using `-j 8`. Of course most of the time here is spent starting and stopping the Python interpreter. If the matches were actually taking real time to process, for example by simulating a game between the players rather than just comparing numbers, the advantage of running in parallel could be very significant.
 
+
+## Credit
+
+Timothy Booth, Edinburgh Genomics (https://genomics.ed.ac.uk)
+This post incorporates content created under the Ed-DaSH project [UKRI grant MR/V039075/1] (https://edcarp.github.io/Ed-DaSH/)
