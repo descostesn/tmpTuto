@@ -147,33 +147,18 @@ Looking at this line by line:
   * Note that I have had to explicitly add `sample = sample_name` here in the expansion as Snakemake will no longer fill this in for me.
 - The rule now has the line `input:  i_reads_for_sample`. Note there are no paretheses or quotes but just the bare function name.
 
-The example is a little contrived, but illustrates all the key points. When Snakemake reads the rule
-definition it saves a reference to the function but does not call it yet. Only once it goes to make the
-rule into a job, and therefore knows the wildcard values form that job, does it actually call the
-function to get the real input files. Any rule may be used to construct multiple workflow
-jobs and Snakemake calls the input function for each of these jobs. Contrast this with the first definition
-of the rule where the `expand(...)` expression would be evaluated immediately, and only once, to make
-a fixed input template.
+The example is a little contrived, but illustrates all the key points. When Snakemake reads the rule definition it saves a reference to the function but does not call it yet. Only once it goes to make the rule into a job, and therefore knows the wildcard values form that job, does it actually call the function to get the real input files. Any rule may be used to construct multiple workflow jobs and Snakemake calls the input function for each of these jobs. Contrast this with the first definition of the rule where the `expand(...)` expression would be evaluated immediately, and only once, to make a fixed input template.
 
-In a real workflow we might put some more flexible logic into the function such as using `glob_wildcards()`
-to dynamically scan for input files per sample, or have a config file to set the number of inputs per sample.
-The input functions can get as complex as you need, and incorporate any amount of Python logic.
+In a real workflow we might put some more flexible logic into the function such as using `glob_wildcards()` to dynamically scan for input files per sample, or have a config file to set the number of inputs per sample. The input functions can get as complex as you need, and incorporate any amount of Python logic.
+
 
 ## Making a tournament bracket with input functions
 
-We'll now show the power of input functions by doing something less common but more interesting. The idea is
-that we need to combine a big list of files but this time our combiner application can only merge two files
-at once, for some reason. We need to adopt a recursive strategy where we merge pairs of files, then merge
-the results, and keep going until we have a single final result. And this should all be realised as a Snakemake
-DAG so that Snakemake can run jobs in parallel, resume partial runs, etc.
+We'll now show the power of input functions by doing something less common but more interesting. The idea is that we need to combine a big list of files but this time our combiner application can only merge two files at once, for some reason. We need to adopt a recursive strategy where we merge pairs of files, then merge the results, and keep going until we have a single final result. And this should all be realised as a Snakemake DAG so that Snakemake can run jobs in parallel, resume partial runs, etc.
 
-It turns out this logic is analagous to running a tournament bracket, where rather then merging the pairs of
-inputs we pick the "winner" from each pairing until we get a final "champion" result. So we'll
-generate a collection of ["top trumps"](https://en.wikipedia.org/wiki/Top_Trumps)
-cards, then play a knockout tournament to find the winner. Unlike the
-previous section, this is a full example that you can run for yourself.
+It turns out this logic is analagous to running a tournament bracket, where rather then merging the pairs of inputs we pick the "winner" from each pairing until we get a final "champion" result. So we'll generate a collection of ["top trumps"](https://en.wikipedia.org/wiki/Top_Trumps) cards, then play a knockout tournament to find the winner. Unlike the previous section, this is a full example that you can run for yourself.
 
-[Here is the code you will need.](/assets/zip/tournament.tar.gz)
+[Here is the code you will need.](tournament.tar.gz)
 
 First, generate our "top trumps" player cards.
 
