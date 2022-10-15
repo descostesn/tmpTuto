@@ -9,42 +9,37 @@ If you turn your entire analysis project into a Snakemake workflow, you may end 
 | [Leif Wigge, Rasmus Ågren and John Sundh SciLifeLab, National Bioinformatics Infrastructure Sweden (NBIS), Bioinformatics Long-term Support, MIT License](https://nbis-reproducible-research.readthedocs.io/en/course_1911/snakemake/) |
 
 
-Sometimes, the standard Snakemake wildcard matching logic is not enough to express the connections you need
-to make, especially with complex combining steps. In these cases we can use **input functions**. Before
-seeing how these work, we need to talk about Python functions in general.
+Sometimes, the standard Snakemake wildcard matching logic is not enough to express the connections you need to make, especially with complex combining steps. In these cases we can use **input functions**. Before seeing how these work, we need to talk about Python functions in general.
+
 
 ## Python functions in general
 
-You've likely made use of utility functions like `expand()` and `glob_wildcards()` in writing Snakefiles. These
-are actually Python functions, but you don't really need to know this to make use of them. Writing your own
-function does require more knowledge of Python syntax, so here is a quick refresher on how they work.
+You've likely made use of utility functions like `expand()` and `glob_wildcards()` in writing Snakefiles. These are actually Python functions, but you don't really need to know this to make use of them. Writing your own function does require more knowledge of Python syntax, so here is a quick refresher on how they work.
 
 Functions in Python look like this:
 
-~~~
+```
 def myfunc(arg1, arg2):
     """Return a pair greetings for the two individuals specified.
     """
     result = expand( "Hello {x}", x = [arg1, arg2] )
     return result
-~~~
-{: .language-python}
+```
 
 There are many things to note in these lines:
 
-* The keyword `def`, as well as the parentheses and the colon, are always used when defining a Python function
-* As with rules, the function has a name of our choosing - `myfunc`
-* The function has *arguments*, ie. placeholders for values to pass in, which are also named - `arg1` and `arg2`
-* The function body is indented and consists of one or more Python statements to be run when the function is called
-* It's good practise to put a comment at the top, saying what exactly this function does
-* The body may set *local variables* - here `result` - which can only be referenced within the function
-* Other functions may be called within the function body - here `expand()`
-* The keyword `return` exits the function with a result
+  * The keyword `def`, as well as the parentheses and the colon, are always used when defining a Python function
+  * As with rules, the function has a name of our choosing - `myfunc`
+  * The function has *arguments*, ie. placeholders for values to pass in, which are also named - `arg1` and `arg2`
+  * The function body is indented and consists of one or more Python statements to be run when the function is called
+  * It's good practise to put a comment at the top, saying what exactly this function does
+  * The body may set *local variables* - here `result` - which can only be referenced within the function
+  * Other functions may be called within the function body - here `expand()`
+  * The keyword `return` exits the function with a result
 
-The simplest way to test the function is to put it in a file and run it with Snakemake. We'll use a couple of `print()`
-lines to call the function and show the result.
+The simplest way to test the function is to put it in a file and run it with Snakemake. We'll use a couple of `print()` lines to call the function and show the result.
 
-~~~
+```
 # Save as myfunc_test.py then run "snakemake -n -s myfunc_test.py"
 def myfunc(arg1, arg2):
     """Return a pair greetings for the two individuals specified.
@@ -54,26 +49,21 @@ def myfunc(arg1, arg2):
 
 print( myfunc("you", "me") )
 print( myfunc("everyone here", "nobody in particular") )
-~~~
-{: .language-python}
+```
 
-Having put the above lines into `myfunc_test.py`, we see that each time the function is called it produces a 2-item list,
-lists of things being denoted by square bracket notation.
-Since there are no rules in this file, Snakemake has nothing to put in the DAG and so it stops after running the two `print()`
-statements.
+Having put the above lines into `myfunc_test.py`, we see that each time the function is called it produces a 2-item list, lists of things being denoted by square bracket notation. Since there are no rules in this file, Snakemake has nothing to put in the DAG and so it stops after running the two `print()` statements.
 
-~~~
+```
 $ snakemake -n -s myfunc_test.py
 ['Hello you', 'Hello me']
 ['Hello everyone here', 'Hello nobody in particular']
 Building DAG of jobs...
 Nothing to be done.
-~~~
+```
 
 > ## Note
 >
-> You could also run the above file directly in Python - `$ python3 myfunc_test.py` - but to make it work you'd
-> also need to add the line
+> You could also run the above file directly in Python - `$ python3 myfunc_test.py` - but to make it work you'd also need to add the line
 >
 > ~~~
 > from snakemake.io import expand
@@ -81,7 +71,7 @@ Nothing to be done.
 >
 > to the top. When the code is run via Snakemake this utility function, among other things, are imported for you.
 >
-{: .callout}
+
 
 
 ## Input functions in Snakemake
